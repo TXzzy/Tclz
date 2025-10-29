@@ -1,0 +1,151 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>弹幕应用 - 网页版</title>
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #000;
+            overflow: hidden;
+            font-family: "Microsoft YaHei", sans-serif;
+            user-select: none;
+        }
+        
+        .popup {
+            position: fixed;
+            width: 200px;
+            height: 80px;
+            border-radius: 8px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 10px;
+            box-sizing: border-box;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+            animation: float 0.5s ease-out;
+            font-weight: bold;
+        }
+        
+        @keyframes float {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        .hint {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 10px 15px;
+            border-radius: 5px;
+            font-size: 14px;
+            z-index: 2000;
+        }
+    </style>
+</head>
+<body>
+    <div class="hint">按ESC键停止弹幕</div>
+
+    <script>
+        // 弹幕消息和背景颜色
+        const messages = ["不要生气啦", "笑一笑嘛", "你最可爱了", "是我不好", "原谅我嘛", 
+                         "给你比心心", "摸摸头", "别不开心", "我错啦", "你是最好的"];
+        
+        const bgColors = ["#FF9FCB", "#ADD8E6", "#FFB6C1", "#B0E0E6", "#FFD700", 
+                         "#98FB98", "#DDA0DD", "#87CEEB", "#FFA07A", "#F0E68C"];
+        
+        let isRunning = true;
+        let popupCount = 0;
+        const maxPopups = 50;
+        const popups = [];
+        
+        // 创建弹幕函数
+        function createPopup() {
+            if (!isRunning || popupCount >= maxPopups) return;
+            
+            const msg = messages[Math.floor(Math.random() * messages.length)];
+            const bg = bgColors[Math.floor(Math.random() * bgColors.length)];
+            const fontSize = Math.floor(Math.random() * 5) + 12; // 12-16px
+            
+            // 创建弹幕元素
+            const popup = document.createElement('div');
+            popup.className = 'popup';
+            popup.textContent = msg;
+            popup.style.backgroundColor = bg;
+            popup.style.fontSize = fontSize + 'px';
+            popup.style.fontFamily = '"楷体", "Microsoft YaHei", sans-serif';
+            
+            // 随机位置
+            const x = Math.floor(Math.random() * (window.innerWidth - 220)) + 50;
+            const y = Math.floor(Math.random() * (window.innerHeight - 110)) + 50;
+            popup.style.left = x + 'px';
+            popup.style.top = y + 'px';
+            
+            document.body.appendChild(popup);
+            popups.push(popup);
+            popupCount++;
+            
+            // 设置下一个弹幕
+            const delay = Math.floor(Math.random() * 400) + 100; // 100-500ms
+            setTimeout(createPopup, delay);
+        }
+        
+        // 停止所有弹幕
+        function stopAllPopups() {
+            isRunning = false;
+            popups.forEach(popup => {
+                if (popup.parentNode) {
+                    popup.parentNode.removeChild(popup);
+                }
+            });
+            popups.length = 0;
+            
+            // 显示停止消息
+            const stopMsg = document.createElement('div');
+            stopMsg.className = 'popup';
+            stopMsg.textContent = '弹幕已停止';
+            stopMsg.style.backgroundColor = '#333';
+            stopMsg.style.color = 'white';
+            stopMsg.style.left = (window.innerWidth/2 - 100) + 'px';
+            stopMsg.style.top = (window.innerHeight/2 - 40) + 'px';
+            stopMsg.style.zIndex = '2000';
+            document.body.appendChild(stopMsg);
+            
+            setTimeout(() => {
+                if (stopMsg.parentNode) {
+                    stopMsg.parentNode.removeChild(stopMsg);
+                }
+            }, 2000);
+        }
+        
+        // 键盘事件监听
+        document.addEventListener('keydown', function(event) {
+            if (event.key === 'Escape') {
+                stopAllPopups();
+            }
+        });
+        
+        // 触摸事件监听（移动设备）
+        document.addEventListener('touchstart', function() {
+            if (window.confirm('是否停止弹幕？')) {
+                stopAllPopups();
+            }
+        });
+        
+        // 开始创建弹幕
+        createPopup();
+    </script>
+</body>
+</html>
